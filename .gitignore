@@ -9,3 +9,4 @@ firebase-debug*.log
 .DS_Store
 .sites-runtime/
 test-results/
+.local-firebase-tool/
