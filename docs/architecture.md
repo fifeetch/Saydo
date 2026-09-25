@@ -2,7 +2,7 @@
 
 ## Données et droits
 
-Le SDK Web Firebase utilise Google Authentication et Firestore. Les collections sont `users/{uid}/sections/{sectionId}` et `users/{uid}/contents/{contentId}`. Chaque document est protégé par [`firestore.rules`](../firestore.rules), qui vérifie l’UID et valide les champs. `sectionId: null` signifie que le contenu se trouve dans la boîte d’entrée. Les contenus sont d’abord déplacés vers la boîte d’entrée avant suppression d’un intercalaire.
+Le SDK Web Firebase utilise l’authentification par e-mail et mot de passe et Firestore. Les collections sont `users/{uid}/sections/{sectionId}` et `users/{uid}/contents/{contentId}`. Chaque document est protégé par [`firestore.rules`](../firestore.rules), qui vérifie l’UID et valide les champs. `sectionId: null` signifie que le contenu se trouve dans la boîte d’entrée. Les contenus sont d’abord déplacés vers la boîte d’entrée avant suppression d’un intercalaire.
 
 La configuration de l’application Firebase Web est intégrée au bundle ; elle n’est pas secrète. Aucune clé privée, aucun mot de passe et aucun compte de service ne sont inclus.
 

@@ -8,7 +8,7 @@ Cahier personnel numérique adapté aux téléphones et ordinateurs. Les notes, 
 
 ## Fonctionnalités
 
-- Connexion Google et données privées par utilisateur.
+- Connexion par e-mail et mot de passe, avec des données privées par utilisateur.
 - Notes, listes avec cases à cocher, événements avec date/heure/lieu.
 - Intercalaires modifiables et boîte d’entrée ; supprimer un intercalaire déplace son contenu dans la boîte d’entrée.
 - Dictée en français dans les navigateurs compatibles ; la personne relit et confirme les champs avant l’écriture.
