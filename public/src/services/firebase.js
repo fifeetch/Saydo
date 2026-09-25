@@ -1,17 +1,35 @@
-/** Hosting is the only active Firebase service for foundation release 0.1. */
-export const FIREBASE_PROJECT_ID = 'saydo-helper';
+import { initializeApp } from 'firebase/app';
+import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
-/**
- * Firebase Hosting exposes its public Web App config after a Web App is registered.
- * Optional: the shell must work before registration, without making remote writes.
- * No SDK, Authentication, Firestore or Storage initialized in this release.
- */
-export async function readHostingConfiguration(fetcher = fetch) {
-  const response = await fetcher('/__/firebase/init.json');
-  if (response.status === 404) return null;
-  if (!response.ok) throw new Error('La configuration Firebase est indisponible.');
-  if (!response.headers.get('content-type')?.includes('application/json')) return null;
-  const config = await response.json();
-  if (config.projectId !== FIREBASE_PROJECT_ID) throw new Error('Le projet Firebase ne correspond pas à SayDo.');
-  return config;
+// Firebase Web config is public by design. Firestore and Storage security rules
+// enforce that each signed-in user can access only their own records.
+export const firebaseApp = initializeApp({
+  apiKey: 'AIzaSyCB5veoJG92HC2prIMRhSmH4bMDc6reUK8',
+  authDomain: 'saydo-helper.firebaseapp.com',
+  projectId: 'saydo-helper',
+  storageBucket: 'saydo-helper.firebasestorage.app',
+  messagingSenderId: '901650622770',
+  appId: '1:901650622770:web:8b65149ffedb8f1cbccf2b',
+});
+
+export const auth = getAuth(firebaseApp);
+export const db = getFirestore(firebaseApp);
+export const storage = getStorage(firebaseApp);
+const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+export function subscribeToUser(callback) { return onAuthStateChanged(auth, callback); }
+export async function signIn() { await signInWithPopup(auth, googleProvider); }
+export async function signOutUser() { await signOut(auth); }
+export function readableFirebaseError(error) {
+  const code = error?.code || '';
+  if (['auth/operation-not-allowed','auth/admin-restricted-operation'].includes(code)) return 'La connexion Google n’est pas encore activée dans Firebase Authentication.';
+  if (['permission-denied','storage/unauthorized'].includes(code)) return 'Firebase a refusé l’accès. Vérifie les règles de sécurité Firestore et Storage.';
+  if (['storage/bucket-not-found','storage/no-default-bucket'].includes(code)) return 'Le stockage Firebase n’est pas encore prêt. Les notes et les listes restent disponibles.';
+  if (code === 'auth/popup-blocked') return 'La fenêtre de connexion a été bloquée. Autorise la fenêtre de connexion Google puis réessaie.';
+  if (code === 'auth/popup-closed-by-user') return 'La fenêtre de connexion a été fermée avant la fin.';
+  if (code === 'unavailable' || code.startsWith('auth/network')) return 'Connexion au service impossible pour le moment. Vérifie Internet puis réessaie.';
+  return error?.message || 'Une erreur est survenue. Réessaie.';
 }

@@ -1,30 +1,15 @@
-# Architecture des fondations
+# Architecture SayDo V2
 
-## Périmètre
+## Données et droits
 
-Le prompt maître n°1 exige un socle fonctionnel minimal. L’application n’invente pas de tâches, de rendez-vous ou de notes enregistrées pour imiter les maquettes. Elle reprend leur couverture verte, papier ivoire, intercalaires pastel et reliure métallique avec des états vides honnêtes.
+Le SDK Web Firebase utilise Google Authentication et Firestore. Les collections sont `users/{uid}/sections/{sectionId}` et `users/{uid}/contents/{contentId}`. Chaque document est protégé par [`firestore.rules`](../firestore.rules), qui vérifie l’UID et valide les champs. `sectionId: null` signifie que le contenu se trouve dans la boîte d’entrée. Les contenus sont d’abord déplacés vers la boîte d’entrée avant suppression d’un intercalaire.
 
-## Navigation et rendu
+La configuration de l’application Firebase Web est intégrée au bundle ; elle n’est pas secrète. Aucune clé privée, aucun mot de passe et aucun compte de service ne sont inclus.
 
-Routes avec fragment pour conserver les liens directs sur un hébergement statique : `#/`, `#/cahier`, `#/entree`, `#/intercalaire/{id}`. Une route inconnue revient à la couverture. Aucun stockage navigateur : seules la route et l’ouverture d’un dialogue constituent l’état actuel.
+## Contenus et voix
 
-Les références visuelles sont les fichiers `01_SayDo_mobile.png`, `02_SayDo_ordinateur.png` et `03_SayDo_accueil_et_famille.png` fournis dans le dossier parent. Les pages sont du HTML utilisable, pas une capture de maquette. Les objets graphiques de reliure utilisent un SVG unique à proportions fixes ; le placement change entre la double page et le mobile.
+Les notes, listes et événements sont enregistrés comme documents Firestore. Une pièce jointe conserve ses métadonnées dans Firestore, tandis que ses octets requièrent Firebase Storage. La dictée utilise l’API de reconnaissance vocale du navigateur lorsqu’elle est disponible, suit une syntaxe explicite et ouvre un formulaire de relecture. Elle ne déclenche jamais d’écriture directe.
 
-## Modèle proposé pour les futures données
+## Publication
 
-Chemins prévus (aucune collection créée à ce stade) :
-
-- `users/{uid}/sections/{sectionId}` : `name`, `color`, `order`, `createdAt`, `updatedAt`.
-- `users/{uid}/contents/{contentId}` : `type`, `sectionId`, `title`, `body`, `createdAt`, `updatedAt` ; les champs propres à chaque type seront ajoutés avec leur module.
-
-Le type décrit le contenu, l’intercalaire décrit son contexte. `sectionId: null` signifie boîte d’entrée. Un contenu conserve son type lorsqu’on le déplace. Les identifiants d’intercalaires restent stables après renommage ; les libellés actuels sont des valeurs initiales, pas une énumération métier permanente.
-
-Les règles devront limiter l’accès au propriétaire authentifié, valider les types et les références. Prévoir explicitement le déplacement des contenus avant suppression d’un intercalaire. Ne pas activer des règles Firestore ouvertes. Pas de règles déployées avant la création du service et de ses tests.
-
-## Voix
-
-À terme : capture audio/transcription → interprétation d’une intention structurée → validation métier → service de contenus. La transcription ne doit pas écrire directement dans Firestore. Cette frontière permettra d’ajouter une compréhension naturelle sans coupler microphone et affichage. Dans la version actuelle, le bouton explique simplement la fonction à venir et n’accède à aucun périphérique.
-
-## Hébergement
-
-Firebase Hosting, projet/site `saydo-helper`. Politique de sécurité limitée aux ressources du même site ; la politique devra être élargie précisément pour les services Firebase ou le microphone lorsqu’ils seront implémentés. Aucun analytics, cookie, dépendance distante ni service facturé ajouté.
+Le script de build regroupe le SDK dans `dist/app.js`; le site statique est servi depuis `dist/`. Les en-têtes CSP autorisent les seuls services Firebase nécessaires et le microphone pour l’origine du site. Les routes restent des fragments pour conserver la navigation sur Firebase Hosting.

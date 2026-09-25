@@ -1,0 +1,54 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function validSection() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['id', 'name', 'color', 'icon', 'order', 'createdAt', 'updatedAt'])
+        && data.id is string && data.id.size() <= 100
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 40
+        && data.color is string && data.color.size() <= 30
+        && data.icon is string && data.icon.size() <= 40
+        && data.order is int;
+    }
+
+    function validContent() {
+      let data = request.resource.data;
+      return data.keys().hasOnly([
+          'id', 'type', 'sectionId', 'title', 'body', 'items', 'date', 'time',
+          'location', 'storagePath', 'fileName', 'fileSize', 'fileType',
+          'createdAt', 'updatedAt'
+        ])
+        && data.id is string && data.id.size() <= 100
+        && data.type in ['note', 'list', 'event', 'file']
+        && (data.sectionId == null || data.sectionId is string)
+        && data.title is string && data.title.size() <= 500
+        && data.body is string && data.body.size() <= 20000
+        && (!('items' in data) || data.items is list)
+        && (!('date' in data) || data.date is string)
+        && (!('time' in data) || data.time is string)
+        && (!('location' in data) || data.location is string)
+        && (!('storagePath' in data) || (data.storagePath is string && data.storagePath.size() <= 1000))
+        && (!('fileName' in data) || (data.fileName is string && data.fileName.size() <= 255))
+        && (!('fileSize' in data) || data.fileSize is int)
+        && (!('fileType' in data) || (data.fileType is string && data.fileType.size() <= 200));
+    }
+
+    match /users/{uid}/sections/{sectionId} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid) && validSection();
+    }
+
+    match /users/{uid}/contents/{contentId} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid) && validContent();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
