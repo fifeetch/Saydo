@@ -17,7 +17,7 @@ function render(){
   const pageName=view.section?.name || (view.kind==='inbox'?'Boîte d’entrée':view.kind==='today'?'Aujourd’hui':'Mon cahier personnel');
   document.title=`${pageName} — SayDo`;
   if(!currentUser){
-    app.innerHTML=`<header class="app-header"><a href="#/" class="wordmark">SayDo<span>MON CAHIER PERSONNEL</span></a></header><main id="main" class="sign-in-scene"><section class="sign-in-card leather"><p class="eyebrow">VOTRE CAHIER PERSONNEL</p><h1>SayDo</h1><p>Notes, listes, rendez-vous et fichiers, réunis dans votre cahier.</p><button class="google-button" data-action="sign-in">${icon('google')} Continuer avec Google</button><p class="privacy-note">Vos contenus sont enregistrés dans votre espace Firebase privé.</p><p class="auth-error" role="status"></p></section></main><footer class="app-footer"><span>Un cahier. Votre univers.</span><span>SayDo V2</span></footer>`;
+    app.innerHTML=`<header class="app-header"><a href="#/" class="wordmark">SayDo<span>MON CAHIER PERSONNEL</span></a></header><main id="main" class="sign-in-scene"><section class="sign-in-card leather"><p class="eyebrow">VOTRE CAHIER PERSONNEL</p><h1>SayDo</h1><p>Notes, listes, rendez-vous et fichiers, réunis dans votre cahier.</p><form class="login-form" data-form="sign-in"><label class="form-field"><span>Adresse e-mail</span><input type="email" name="email" autocomplete="username" required></label><label class="form-field"><span>Mot de passe</span><input type="password" name="password" autocomplete="current-password" required></label><button class="google-button" type="submit">Se connecter</button></form><p class="privacy-note">Vos contenus sont enregistrés dans votre espace Firebase privé.</p><p class="auth-error" role="status" aria-live="polite"></p></section></main><footer class="app-footer"><span>Un cahier. Votre univers.</span><span>SayDo V2</span></footer>`;
     firstRender=false;return;
   }
   app.innerHTML=`<header class="app-header"><a href="#/" class="wordmark" aria-label="SayDo — couverture">SayDo<span>MON CAHIER PERSONNEL</span></a><nav class="header-nav" aria-label="Navigation principale"><a href="#/cahier" aria-label="Aujourd’hui" ${view.kind==='today'?'aria-current="page"':''}>${icon('sun')}<span>Aujourd’hui</span></a><a href="#/entree" aria-label="Boîte d’entrée" ${view.kind==='inbox'?'aria-current="page"':''}>${icon('inbox')}<span>Boîte d’entrée</span></a><button class="top-mic" data-action="voice" aria-label="Dicter un contenu">${icon('mic')}</button><button class="add-button" data-action="open-choices">${icon('plus')}<span>Ajouter</span></button><button class="menu-button" data-action="account-menu" aria-label="Compte : ${escape(currentUser.displayName||currentUser.email||'Google')}">${escape((currentUser.displayName||currentUser.email||'S').slice(0,1).toLocaleUpperCase('fr-FR'))}</button></nav></header>${view.kind==='cover'?cover(notebookState.sections):notebook(view,notebookState)}<div class="app-status" role="status" aria-live="polite"></div><footer class="app-footer"><span>Un cahier. Votre univers.</span><span>Enregistré dans Firebase · ${escape(currentUser.email||'Compte Google')}</span></footer>`;
@@ -62,7 +62,6 @@ document.addEventListener('click',async event=>{
   const button=event.target.closest('[data-action]');if(!button)return;
   const action=button.dataset.action;
   try{
-    if(action==='sign-in'){button.disabled=true;button.textContent='Connexion…';await signIn();return;}
     if(action==='open-choices'){showChoice();return;}
     if(action==='choose-type'){showForm(button.dataset.type);return;}
     if(action==='voice'){listenByVoice();return;}
@@ -111,6 +110,13 @@ document.addEventListener('change',event=>{
 });
 
 document.addEventListener('submit',async event=>{
+  const loginForm=event.target.closest('[data-form="sign-in"]');
+  if(loginForm){
+    event.preventDefault();const button=loginForm.querySelector('[type="submit"]');const email=loginForm.querySelector('[name="email"]').value.trim();const password=loginForm.querySelector('[name="password"]').value;
+    button.disabled=true;button.textContent='Connexion…';
+    try{await signIn(email,password);}catch(error){showError(readableFirebaseError(error));button.disabled=false;button.textContent='Se connecter';}
+    return;
+  }
   const form=event.target.closest('[data-form="content"]');if(!form)return;
   event.preventDefault();const data=new FormData(form);const type=form.dataset.type;const sectionValue=data.get('sectionId');
   if(!sectionValue){form.querySelector('[name="sectionId"]').reportValidity();return;}

@@ -13,7 +13,7 @@
 .sign-in-card{position:relative;max-width:470px;width:100%;padding:54px 46px;text-align:center;border-radius:20px;color:#f5f1e6}
 .sign-in-card .eyebrow{color:#e5e7d1}.sign-in-card h1{font-size:64px;color:#293326;margin:12px 0}.sign-in-card>p:not(.eyebrow){line-height:1.7;color:#f1efdf}
 .google-button,.add-button,.submit-button,.secondary-button,.voice-listen-button{display:inline-flex;align-items:center;justify-content:center;gap:10px;border-radius:28px;padding:13px 20px;font-weight:600;transition:filter .18s,transform .18s}
-.google-button{margin:25px 0 18px;background:#f7f4eb;color:#30362d;border:1px solid #fff9}.google-button .icon{width:20px;height:20px}
+.google-button{margin:18px 0;background:#f7f4eb;color:#30362d;border:1px solid #fff9}.google-button .icon{width:20px;height:20px}.login-form{display:grid;gap:12px;text-align:left;margin-top:22px}.login-form .form-field{color:#f5f1e6}.login-form .google-button{width:100%;margin:5px 0 0}
 .privacy-note{font-size:12px!important;color:#e9e8d5!important}
 .auth-error,.app-status{font-size:13px;color:#873e34}.app-status{max-width:1200px;margin:12px auto 0;padding:0 20px;min-height:20px}
 .top-mic,.icon-action,.text-action{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:transparent;color:#4f5d48;padding:9px;border-radius:50%}.top-mic:hover,.icon-action:hover{background:#fff7}.top-mic .icon{width:21px;height:21px}

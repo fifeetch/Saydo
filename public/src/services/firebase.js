@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
@@ -17,15 +17,15 @@ export const firebaseApp = initializeApp({
 export const auth = getAuth(firebaseApp);
 export const db = getFirestore(firebaseApp);
 export const storage = getStorage(firebaseApp);
-const googleProvider = new GoogleAuthProvider();
-googleProvider.setCustomParameters({ prompt: 'select_account' });
-
 export function subscribeToUser(callback) { return onAuthStateChanged(auth, callback); }
-export async function signIn() { await signInWithPopup(auth, googleProvider); }
+export async function signIn(email, password) { await signInWithEmailAndPassword(auth, email, password); }
 export async function signOutUser() { await signOut(auth); }
 export function readableFirebaseError(error) {
   const code = error?.code || '';
-  if (['auth/operation-not-allowed','auth/admin-restricted-operation'].includes(code)) return 'La connexion Google n’est pas encore activée dans Firebase Authentication.';
+  if (['auth/operation-not-allowed','auth/admin-restricted-operation'].includes(code)) return 'La connexion par e-mail et mot de passe n’est pas activée dans Firebase Authentication.';
+  if (['auth/invalid-credential','auth/user-not-found','auth/wrong-password'].includes(code)) return 'Adresse e-mail ou mot de passe incorrect.';
+  if (code === 'auth/invalid-email') return 'Cette adresse e-mail n’est pas valide.';
+  if (code === 'auth/too-many-requests') return 'Trop de tentatives. Attends un peu avant de réessayer.';
   if (['permission-denied','storage/unauthorized'].includes(code)) return 'Firebase a refusé l’accès. Vérifie les règles de sécurité Firestore et Storage.';
   if (['storage/bucket-not-found','storage/no-default-bucket'].includes(code)) return 'Le stockage Firebase n’est pas encore prêt. Les notes et les listes restent disponibles.';
   if (code === 'auth/popup-blocked') return 'La fenêtre de connexion a été bloquée. Autorise la fenêtre de connexion Google puis réessaie.';
